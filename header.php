@@ -18,13 +18,13 @@
 <head>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
 <title><?php
- 
+
     global $page, $paged;
- 
+
     wp_title( '|', true, 'right' );
- 
+
     bloginfo( 'name' );
- 
+
     $site_description = get_bloginfo( 'description', 'display' );
     if ( $site_description && ( is_home() || is_front_page() ) )
         echo " | $site_description";
@@ -42,15 +42,16 @@
 <?php wp_head(); ?>
 <?php typical_body_font(); ?>
 </head>
- 
+
 <body <?php body_class(); ?>>
 	<header role="banner">
 		<?php
 			$logo = get_option( 'logo-image' );
-			
-			if ( $logo != null ) { 
-				$home_url = home_url( '/' );
-				$home_url_escaped = esc_url($home_url);
+
+			$home_url = home_url( '/' );
+			$home_url_escaped = esc_url($home_url);
+
+			if ( $logo != null ) {
 				?>
 				<hgroup>
 					<h1 class="with-image"><a href="<?php echo $home_url_escaped; ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home"><span><?php bloginfo( 'name' ); ?></span><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/custom-logo.png" alt="" /></a></h1>
@@ -60,7 +61,7 @@
 				<hgroup>
 					<h1><a href="<?php echo $home_url_escaped; ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
 					<h2><?php bloginfo( 'description' ); ?></h2>
-				</hgroup>			
+				</hgroup>
 			<?php } ?>
 			<?php wp_nav_menu( array( 'container' => 'nav', 'fallback_cb' => 'typical_menu', 'theme_location' => 'primary' ) ); ?>
 		<div></div>

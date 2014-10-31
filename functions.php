@@ -13,6 +13,20 @@ function twitter_replace($content) {
 }
 add_filter('the_content', 'twitter_replace');
 
+/** More secure error message, from http://bloggingspree.com/how-to-protect-your-blog-from-botnet-hackers/ */
+function wrong_login() {
+  return 'Wrong username and/or password.';
+}
+add_filter('login_errors', 'wrong_login');
+
+/** Change the username, from http://wordpress.stackexchange.com/a/6527 */
+add_action( 'user_profile_update_errors', 'wpse5742_set_user_nicename_to_nanoname', 10, 3 );
+function wpse5742_set_user_nicename_to_nanoname( &$errors, $update, &$user )
+{
+    $nanoName = get_cimyFieldValue($user->id, 'NANONAME');
+    $user->user_nicename = sanitize_title(cimy_uef_sanitize_content($nanoName));
+}
+
 /** Tell WordPress to run typical_setup() when the 'after_setup_theme' hook is run. */
 
 add_action( 'after_setup_theme', 'typical_setup' );
@@ -24,14 +38,14 @@ if ( !function_exists( 'typical_setup' ) ):
 */
 
 	function typical_setup() {
-	
+
 		// Add background and header image support
 		add_theme_support( 'custom-header' );
 		add_theme_support( 'custom-background' );
-	
+
 		// Editor stylesheet support
 		add_editor_style('wysiwyg.css');
-		
+
 		// This theme uses post thumbnails
 		add_theme_support( 'post-thumbnails' );
 		add_image_size( 'Typical Thumbnail', 600, 600, true );
@@ -86,7 +100,7 @@ if ( !function_exists( 'typical_comment' ) ) :
 /**
 * Template for comments and pingbacks
 */
- 
+
 	function typical_comment( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
 		switch ( $comment->comment_type ) :
@@ -100,8 +114,8 @@ if ( !function_exists( 'typical_comment' ) ) :
 				<h4>
 					<?php printf( __( '%s', 'typical' ), sprintf( '%s', get_comment_author_link() ) );
 					/* translators: 1: date, 2: time */
-					?> 
-					<time itemprop="commentTime" datetime="<?php comment_date( 'Y-m-d' ); ?>"><span aria-hidden="true">&#x274F;</span> 
+					?>
+					<time itemprop="commentTime" datetime="<?php comment_date( 'Y-m-d' ); ?>"><span aria-hidden="true">&#x274F;</span>
 							<?php printf( __( '%1$s', 'typical' ), get_comment_date( 'd M Y' )) ?>
 					</time>
 				</h4>
@@ -172,7 +186,7 @@ function typical_widgets_init() {
 
 // Register sidebars by running typical_widgets_init() on the widgets_init hook
 add_action( 'widgets_init', 'typical_widgets_init' );
- 
+
 /**
 * Removes the default styles that are packaged with the Recent Comments widget
 */
@@ -203,16 +217,16 @@ if ( ! function_exists( 'typical_posted_on' ) ) :
 				get_the_author()
 			)
 		);
-		
+
 		/**
 		* Adds Twitter and Instapaper links
 		*/
-		
+
 		if ( is_single() ) {
 		?>
 			<div>
 			<a rel="external" target="_blank" title="Post this article on Twitter" href="http://twitter.com/share?text=<?php the_title() ?>"><span aria-hidden="true">&#x275E;</span> <strong>Tweet this!</strong></a>
-			
+
 			<?php
 			$theURL = get_permalink();
 			$theTitle = get_the_title();
@@ -282,12 +296,12 @@ return $class;
 }
 
 add_filter( 'get_avatar','typical_change_avatar_css' );
- 
+
 /**
 * Author info boxes using ARIA role="note"
 */
 
-if ( ! function_exists( 'typical_author_info' ) ) : 
+if ( ! function_exists( 'typical_author_info' ) ) :
 	function typical_author_info() { ?>
 	<section role="note" itemscope itemtype="http://schema.org/Person">
 		<h1>The author, <em>
@@ -298,10 +312,10 @@ if ( ! function_exists( 'typical_author_info' ) ) :
 		</h1>
 			<div>
 				<figure>
-					<?php 
+					<?php
 					$authorAvatar = get_avatar( get_the_author_meta( 'user_email' ), apply_filters( 'typical_author_bio_avatar_size', 200 ) );
-					echo $authorAvatar;  
-					?>					
+					echo $authorAvatar;
+					?>
 				</figure>
 			</div>
 			<div>
@@ -310,35 +324,35 @@ if ( ! function_exists( 'typical_author_info' ) ) :
 			<footer>
 				<p>
 					<small>
-						<a itemprop="url" href="<?php the_author_meta( 'user_url' ); ?>"><span aria-hidden="true">S</span> <i>The author's website</i></a> 
-						<a href="<?php the_author_meta( 'twitter' ); ?>"><span aria-hidden="true">T</span> <i>The author's Twitter</i></a> 
+						<a itemprop="url" href="<?php the_author_meta( 'user_url' ); ?>"><span aria-hidden="true">S</span> <i>The author's website</i></a>
+						<a href="<?php the_author_meta( 'twitter' ); ?>"><span aria-hidden="true">T</span> <i>The author's Twitter</i></a>
 						<a href="<?php the_author_meta( 'google' ); ?>" rel="me"><span aria-hidden="true">G</span> <i>The author's Google<sup>+</sup></i></a>
 					</small>
 				</p>
 			</footer>
 	</section>
-	<?php 
+	<?php
 	}
-endif; 
+endif;
 
 
 /**
 * HTML5 (<figure>) post thumbnails with caption support
 */
-	
-if ( ! function_exists( 'typical_post_thumb_figure' ) ) : 
-	function typical_post_thumb_figure() { ?>	
+
+if ( ! function_exists( 'typical_post_thumb_figure' ) ) :
+	function typical_post_thumb_figure() { ?>
 	<figure>
 		<?php the_post_thumbnail( 'Typical Thumbnail' ); ?>
 		<figcaption>
 			<?php echo get_post( get_post_thumbnail_id() )->post_excerpt ?>
 		</figcaption>
 	</figure>
-	<?php 
+	<?php
 	}
-endif; 
+endif;
 
-if ( !function_exists( 'typical_pagination' ) ) : 
+if ( !function_exists( 'typical_pagination' ) ) :
 
 /**
 * Posts pagination <nav> with inactive links faded out
@@ -346,25 +360,25 @@ if ( !function_exists( 'typical_pagination' ) ) :
 
 	function typical_pagination() {	?>
 			<nav>
-				<?php 
+				<?php
 				if( get_previous_posts_link() ) {
 					previous_posts_link( __( '<span aria-hidden="true">&#x2190;</span> Newer posts', 'typical' ) );
 				} else { ?>
 					<a rel="prev" href="#no"><span aria-hidden="true">&#x2190;</span> Newer posts</a>
-				<?php } 
+				<?php }
 				if( get_next_posts_link() ) {
 					next_posts_link( __( 'Older posts <span aria-hidden="true">&#x2192;</span>', 'typical' ) );
 				} else { ?>
 					<a rel="next" href="#no">Older posts <span aria-hidden="true">&#x2192;</span></a>
 		  <?php } ?>
-			</nav> 
-		<?php 
+			</nav>
+		<?php
 	}
 endif;
 
 /**
 * Add rel attributes to post links
-*/ 
+*/
 
 function _typical_previous_posts_link_css( $content ) {
 	return 'rel="prev"';
@@ -380,11 +394,11 @@ add_filter( 'next_posts_link_attributes', 'typical_next_posts_link_css' );
 * Load CDN jquery
 */
 
-function typical_load_external_jQuery() {  
+function typical_load_external_jQuery() {
 	wp_deregister_script( 'jquery' );
 	wp_register_script( 'jquery', 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' );
 	wp_enqueue_script( 'jquery' );
-}  
+}
 add_action( 'wp_enqueue_scripts', 'typical_load_external_jQuery' );
 
 /**
@@ -414,8 +428,8 @@ add_filter( 'excerpt_more', 'typical_more' );
 function typical_new_contactmethods( $contactmethods ) {
 	$contactmethods['twitter'] = 'Twitter';
 	$contactmethods['google'] = 'Google+';
-	unset($contactmethods['yim']);  
-	unset($contactmethods['aim']);  
+	unset($contactmethods['yim']);
+	unset($contactmethods['aim']);
 	unset($contactmethods['jabber']);
 	return $contactmethods;
 }
@@ -463,7 +477,7 @@ function typical_load_google_fonts() {
 add_action('wp_print_styles', 'typical_load_google_fonts');
 
 if ( !function_exists( 'typical_body_font' ) ) :
-	
+
 	/**
 	* Set body font-family based on theme option (see above function)
 	*/
@@ -485,19 +499,19 @@ endif;
 
 add_action( 'admin_menu', 'typical_setup_theme_admin_menus' );
 
-function typical_setup_theme_admin_menus() {  
+function typical_setup_theme_admin_menus() {
    add_theme_page( 'Typical Theme Options', 'Theme Options', 'edit_theme_options', 'typical-theme-options', 'typical_theme_options_page' );
 }
 
-function typical_theme_options_page() {  
-    if ( !current_user_can('manage_options') ) {  
-		wp_die('<p>Sorry, my dear. You are not allowed to edit this particular page.</p>');  
+function typical_theme_options_page() {
+    if ( !current_user_can('manage_options') ) {
+		wp_die('<p>Sorry, my dear. You are not allowed to edit this particular page.</p>');
 	} ?>
-	<div class="wrap">  
+	<div class="wrap">
 		<?php screen_icon( 'themes' ); ?> <h2>Theme Settings For Typical</h2>
 		<p class="top-notice">Typical includes the following settings. To reconfigure the theme further, consult the functions.php file where the PHP form for setting these options is included.</p>
 		<?php
-		
+
 		$fontface = get_option( 'font-face' );
 		$introductoryTitle = get_option( 'introductory-title' );
 		$introduction = get_option( 'introduction' );
@@ -505,7 +519,7 @@ function typical_theme_options_page() {
 		$footerText = get_option( 'footer-text' );
 		$hideIcons = get_option( 'hide-icons' );
 		$customFavicon = get_option( 'custom-favicon' );
-		
+
 		if ( isset($_POST["update_settings"]) ) {
 			$fontface = $_POST["font-face"];
 			$introductoryTitle = htmlspecialchars( $_POST["introductory-title"] );
@@ -514,13 +528,13 @@ function typical_theme_options_page() {
 			$logoImage = isset( $_POST["logo-image"]) ? $_POST["logo-image"] : null;
 			$hideIcons = isset( $_POST["hide-icons"]) ? $_POST["hide-icons"] : null;
 			$customFavicon = isset( $_POST["custom-favicon"]) ? $_POST["custom-favicon"] : null;
-			
+
 			$footerText = trim( $_POST["footer-text"] );
 			$formErrors = array();
-			
+
 			$introduction = stripslashes( $introduction );
 			$footerText = stripslashes( $footerText );
-			
+
 			if ( !empty($formErrors) ) {
 				foreach($formErrors as $error) { ?>
 					<div class="error below-h2">
@@ -532,7 +546,7 @@ function typical_theme_options_page() {
 				if ( empty($introductoryTitle) ) {
 					$introductoryTitle = 'Introduction';
 				}
-				
+
 				update_option('font-face', $fontface);
 				update_option('introductory-title', $introductoryTitle);
 				update_option('introduction', $introduction);
@@ -543,20 +557,20 @@ function typical_theme_options_page() {
 			?>
 				<div id="message" class="updated below-h2">
 					<p>Typical Theme settings have been saved.</p>
-				</div>				
+				</div>
 			<?php
 			}
-		}		
-		?>		
-		<form method="POST" action="">  
-			<table class="form-table">  
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="font-face">  
-							Font family: 
-						</label>   
-					</th>  
-					<td>  
+		}
+		?>
+		<form method="POST" action="">
+			<table class="form-table">
+				<tr valign="top">
+					<th scope="row">
+						<label for="font-face">
+							Font family:
+						</label>
+					</th>
+					<td>
 						<select id="font-face" name="font-face">
 							<option value="Averia+Serif+Libre" <?php if ( $fontface == 'Averia+Serif+Libre' ) {?>selected="selected"<?php } ?>>Averia Serif Libre</option>
 							<option value="Vollkorn" <?php if ( $fontface == 'Vollkorn' ) {?>selected="selected"<?php } ?>>Vollkorn</option>
@@ -566,73 +580,73 @@ function typical_theme_options_page() {
 							<option value="Gentium+Book+Basic" <?php if ( $fontface == 'Gentium+Book+Basic' ) {?>selected="selected"<?php } ?>>Gentium Book Basic</option>
 						</select>
 						<span style="display:block" class="description">Each family includes 400, 400 italic and 700 faces and is served from Google Web Fonts.</span>
-					</td>  
+					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="introductory-title">  
-							Homepage introductory title: 
-						</label>   
-					</th>  
-					<td>  
+				<tr valign="top">
+					<th scope="row">
+						<label for="introductory-title">
+							Homepage introductory title:
+						</label>
+					</th>
+					<td>
 						<input type="text" maxlength="40" name="introductory-title" id="introductory-title" value="<?php echo $introductoryTitle; ?>" />
 						<span style="display:block" class="description">Optional. Defaults to "Introduction" but does not display if "Homepage introduction" is not filled out below.</span>
-					</td>  
+					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="introduction">  
-							Homepage introduction: 
-						</label>   
-					</th>  
-					<td>  
+				<tr valign="top">
+					<th scope="row">
+						<label for="introduction">
+							Homepage introduction:
+						</label>
+					</th>
+					<td>
 						<textarea id="introduction" name="introduction" style="width:300px"><?php echo $introduction; ?></textarea>
 						<span style="display:block" class="description">Optional: Write some text to introduce your blog. HTML such as links permitted. Follows the introductory title set above.</span>
-					</td>  
+					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="logo-image">  
+				<tr valign="top">
+					<th scope="row">
+						<label for="logo-image">
 							Use a logo image?
-						</label>   
-					</th>  
-					<td>  
+						</label>
+					</th>
+					<td>
 						<input type="checkbox" name="logo-image" id="logo-image" value="Yes" <?php if ( $logoImage != null ) { echo 'checked="checked"'; } ?> />
 						<span style="display:block" class="description">Check if you wish to use an image / logo for your site title.<br/> The text version of the name will be accessibly hidden. <br/>You must place the image in the theme's <strong>images</strong> folder and name it <strong>custom-logo.png</strong>.</span>
 					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="custom-favicon">  
+				<tr valign="top">
+					<th scope="row">
+						<label for="custom-favicon">
 							Use a custom favicon?
-						</label>   
-					</th>  
-					<td>  
+						</label>
+					</th>
+					<td>
 						<input type="checkbox" name="custom-favicon" id="custom-favicon" value="Yes" <?php if ( $customFavicon != null ) { echo 'checked="checked"'; } ?> />
 						<span style="display:block" class="description">Should you wish to use a custom favicon, check this box and save the image as <strong>images/favicon.png</strong> in the theme folder, replacing the example file.</span>
 					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="footer-text">  
-							Custom footer text: 
-						</label>   
-					</th>  
-					<td>  
+				<tr valign="top">
+					<th scope="row">
+						<label for="footer-text">
+							Custom footer text:
+						</label>
+					</th>
+					<td>
 						<textarea id="footer-text" name="footer-text" style="width:300px"><?php echo $footerText; ?></textarea>
 						<span style="display:block" class="description">Optional: Replace the default "You have been reading [Sitename]" with some custom info. Links allowed.</span>
-					</td>  
+					</td>
 				</tr>
-				<tr valign="top">  
-					<th scope="row">  
-						<label for="hide-icons">  
+				<tr valign="top">
+					<th scope="row">
+						<label for="hide-icons">
 							Hide footer icons?
 						</label>
-					</th>  
-					<td>  
+					</th>
+					<td>
 						<input type="checkbox" name="hide-icons" id="hide-icons" value="Yes" <?php if ( $hideIcons != null ) { echo 'checked="checked"'; } ?> />
 						<span style="display:block" class="description">Check to hide the Wordpress and Heydonworks (theme author) icons in your footer.</span>
-					</td>  
+					</td>
 				</tr>
 				<tr>
 					<td>
@@ -641,19 +655,19 @@ function typical_theme_options_page() {
 				</tr>
 				<tr>
 					<td>
-						<input type="submit" value="Save settings" class="button-primary"/> 
+						<input type="submit" value="Save settings" class="button-primary"/>
 					</td>
 				</tr>
 			</table>
 		</form>
 		<h2>Using Typical's shortcodes</h2>
-		
+
 		<p>Typical provides two shortcodes: One for making blockquotes and one for making HTML5 figures (for images only) in your posts. Below are two examples.</p>
-		
+
 		<p><strong>Blockquote</strong>:</p>
-		
+
 		<pre>
-		
+
 		&#x5b;blockquote quotation="Shortcodes are great!" author="Heydon Pickering" author_url="http://www.heydonworks.com"&#x5d;
 
 		// Output:
@@ -664,13 +678,13 @@ function typical_theme_options_page() {
 			  &lt;a href="http://www.heydonworks.com"&gt;Heydon Pickering&lt;/a&gt;
 		   &lt;/footer&gt;
 		&lt;/blockquote&gt;
-		
+
 		</pre>
-		
+
 		<p><strong>Figure</strong>:</p>
-		
+
 		<pre>
-		
+
 		&#x5b;image_figure image_url="http://www.heydonworks.com/images/portrait.jpg" alt="Portrait of The Theme Author" caption="The Theme Author, Heydon Pickering"&#x5d;
 
 		// Output:
@@ -679,20 +693,20 @@ function typical_theme_options_page() {
 		   &lt;img src="http://www.heydonworks.com/images/portrait.jpg" alt="Portrait of The Theme Author"&gt;
 		   &lt;figcaption&gt;The Theme Author, Heydon Pickering&lt;/figcaption&gt;
 		&lt;/figure&gt;
-		
+
 		</pre>
 
 		<h2>Credits</h2>
-		
+
 		<p>This theme was created by <a href="http://twitter.com/heydonworks">@heydonworks</a> (<a href="http://www.heydonworks.com">http://www.heydonworks.com</a>) for Wordpress.</p>
-		
+
 		<p>Some of the designs in Typical's icon font were adapted from Michelle Dixon's beautiful <a href="http://www.fontsquirrel.com/fonts/Printers-Ornaments-One">Printers Ornaments One</a> typeface.</p>
-		
+
 		<p>Typical incorporates <a href="http://profiles.wordpress.org/nacin/">Andrew Nacin</a>'s excellent <a href="http://wordpress.org/extend/plugins/simple-footnotes/">Simple Footnotes</a> plugin natively.</p>
-		
+
 	</div>
-<?php } 
- 
+<?php }
+
 /**
 * Footnotes support. Incorporates a modified version of nacin's Simple Footnotes plugin
 * (http://wordpress.org/extend/plugins/simple-footnotes/)
